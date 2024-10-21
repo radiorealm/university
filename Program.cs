@@ -46,26 +46,24 @@ class Program
                 switch (n)
                 {
                     case 1:
-                        Console.WriteLine("Введите имя и фамилию студента через пробел");
-                        string[] NS = Console.ReadLine().Split();
+                        string name = GetValue<string>("Введите имя студента");
 
-                        Console.WriteLine("Введите факультет");
-                        string department = Console.ReadLine();
+                        string surname = GetValue<string>("Введите фамилию студента");
 
-                        Console.WriteLine("Введите дату рождения (YYYY-MM-DD)");
-                        string DateString = Console.ReadLine();
-                        DateOnly Date = DateOnly.Parse(DateString);
+                        string department = GetValue<string>("Введите факультет");
 
-                        InsertStudent(connection, NS[0], NS[1], department, Date);
+                        DateOnly Date = GetInputDate("Введите дату рождения (YYYY-MM-DD)");
+
+                        InsertStudent(connection, name, surname, department, Date);
                         break;
                     case 2:
-                        Console.WriteLine("Введите имя и фамилию преподавателя через пробел");
-                        NS = Console.ReadLine().Split();
+                        name = GetValue<string>("Введите имя преподавателя");
 
-                        Console.WriteLine("Введите факультет");
-                        department = Console.ReadLine();
+                        surname = GetValue<string>("Введите фамилию преподавателя ");
 
-                        InsertTeacher(connection, NS[0], NS[1], department);
+                        department = GetValue<string>("Введите факультет");
+
+                        InsertTeacher(connection, name, surname, department);
                         break;
                     case 3:
                         Console.WriteLine("Введите имя и фамилию преподавателя, ведущего курс, через пробел");
@@ -84,7 +82,7 @@ class Program
                         course = Console.ReadLine();
 
                         Console.WriteLine("Введите дату проведения экзамена (YYYY-MM-DD)");
-                        DateString = Console.ReadLine();
+                        string DateString = Console.ReadLine();
                         Date = DateOnly.Parse(DateString);
 
                         Console.WriteLine("Введите максимальный балл за экзамен");
@@ -539,5 +537,60 @@ class Program
         int.TryParse(string.Join("", input.Where(c => char.IsDigit(c))), out n);
 
         return n;
+    }
+
+    public static T GetValue<T>(string prompt)
+    {
+        while (true)
+        {
+            Console.WriteLine(prompt);
+            string input = Console.ReadLine();
+
+            if (TryParse<T>(input, out T result))
+            {
+                return result;
+            }
+            else
+            {
+                Console.WriteLine($"Некорректный ввод. Пожалуйста, введите значение типа {typeof(T).Name}.");
+            }
+        }
+    }
+
+    private static bool TryParse<T>(string input, out T result)
+    {
+        try
+        {
+            result = (T)Convert.ChangeType(input, typeof(T));
+            return true;
+        }
+        catch (FormatException)
+        {
+            result = default(T);
+            return false;
+        }
+        catch (InvalidCastException)
+        {
+            result = default(T);
+            return false;
+        }
+    }
+
+    static DateOnly GetInputDate(string prompt)
+    {
+        while (true)
+        {
+            Console.WriteLine(prompt);
+            string input = Console.ReadLine();
+
+            if (DateOnly.TryParse(input, out DateOnly result))
+            {
+                return result;
+            }
+            else
+            {
+                Console.WriteLine($"Некорректный формат даты. Пожалуйста, введите дату в формате YYYY-MM-DD.");
+            }
+        }
     }
 }
