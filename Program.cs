@@ -81,9 +81,7 @@ class Program
                         Console.WriteLine("Введите название курса, на котором будет проводиться экзамен");
                         course = Console.ReadLine();
 
-                        Console.WriteLine("Введите дату проведения экзамена (YYYY-MM-DD)");
-                        string DateString = Console.ReadLine();
-                        Date = DateOnly.Parse(DateString);
+                        Date = GetInputDate("Введите дату проведения экзамена (YYYY-MM-DD)");
 
                         Console.WriteLine("Введите максимальный балл за экзамен");
                         int grade = int.Parse(Console.ReadLine());
@@ -94,9 +92,7 @@ class Program
                         Console.WriteLine("Введите имя и фамилию студента, получившего оценку, через пробел");
                         NS = Console.ReadLine().Split();
 
-                        Console.WriteLine("Введите дату проведения экзамена (YYYY-MM-DD), за который была получена оценка");
-                        DateString = Console.ReadLine();
-                        Date = DateOnly.Parse(DateString);
+                        Date = GetInputDate("Введите дату экзамена (YYYY-MM-DD), за который была получена оценка");
 
                         Console.WriteLine("Введите оценку");
                         int score = int.Parse(Console.ReadLine());
@@ -148,9 +144,7 @@ class Program
                         DeleteCourse(connection, course);
                         break;
                     case 12:
-                        Console.WriteLine("Введите дату проведения экзамена (YYYY-MM-DD):");
-                        DateString = Console.ReadLine();
-                        Date = DateOnly.Parse(DateString);
+                        Date = GetInputDate("Введите дату проведения экзамена (YYYY-MM-DD)");
 
                         DeleteExam(connection, Date);
                         break;
