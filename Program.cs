@@ -38,6 +38,22 @@ class Program
 
             CreateTables(connection);
 
+            InsertStudent(connection, "Петр", "Петрович", "Чудесатых Наук", DateOnly.Parse("2001-09-11"));
+            InsertStudent(connection, "Петр", "Фомин", "Чудесатых Наук", DateOnly.Parse("2000-10-10"));
+            InsertStudent(connection, "Иван", "Петрович", "Одуванчикового Вина", DateOnly.Parse("2001-09-11"));
+
+            InsertTeacher(connection, "Николай", "Динозавриев", "Динозавры");
+            InsertTeacher(connection, "Евгений", "Макаров", "Лазертаг");
+
+            InsertCourse(connection, "Николай", "Динозавриев", "Теории вымирания динозавров", "Не переживайте. Не переживем.");
+            InsertCourse(connection, "Евгений", "Макаров", "Меткость", "-3 ЮХУ!!");
+
+            InsertExam(connection, "Теории вымирания динозавров", DateOnly.Parse("2024-10-31"), 100);
+
+            InsertGrade(connection, "Петр", "Петрович", DateOnly.Parse("2024-10-31"), 20);
+            InsertGrade(connection, "Петр", "Фомин", DateOnly.Parse("2024-10-31"), 20);
+
+
             while (n != 20)
             {
                 Console.WriteLine("Выберите действие");
@@ -66,80 +82,78 @@ class Program
                         InsertTeacher(connection, name, surname, department);
                         break;
                     case 3:
-                        Console.WriteLine("Введите имя и фамилию преподавателя, ведущего курс, через пробел");
-                        NS = Console.ReadLine().Split();
 
-                        Console.WriteLine("Введите название курса");
-                        string course = Console.ReadLine();
+                        name = GetValue<string>("Введите имя преподавателя, ведущего курс");
 
-                        Console.WriteLine("Введите описание курса");
-                        string description = Console.ReadLine();
+                        surname = GetValue<string>("Введите фамилию преподавателя, ведущего курс");
 
-                        InsertCourse(connection, NS[0], NS[1], course, description);
+                        string course = GetValue<string>("Введите название курса");
+
+                        string description = GetValue<string>("Введите описание курса");
+
+                        InsertCourse(connection, name, surname, course, description);
                         break;
                     case 4:
-                        Console.WriteLine("Введите название курса, на котором будет проводиться экзамен");
-                        course = Console.ReadLine();
+                        course = GetValue<string>("Введите название курса, на котором будет проводиться экзамен");
 
                         Date = GetInputDate("Введите дату проведения экзамена (YYYY-MM-DD)");
 
-                        Console.WriteLine("Введите максимальный балл за экзамен");
-                        int grade = int.Parse(Console.ReadLine());
+                        int grade = GetValue<int>("Введите максимальный балл за экзамен");
 
                         InsertExam(connection, course, Date, grade);
                         break;
                     case 5:
-                        Console.WriteLine("Введите имя и фамилию студента, получившего оценку, через пробел");
-                        NS = Console.ReadLine().Split();
+                        name = GetValue<string>("Введите имя студента, получившего оценку");
+
+                        surname = GetValue<string>("Введите фамилию студента, получившего оценку");
 
                         Date = GetInputDate("Введите дату экзамена (YYYY-MM-DD), за который была получена оценка");
 
-                        Console.WriteLine("Введите оценку");
-                        int score = int.Parse(Console.ReadLine());
+                        int score = GetValue<int>("Введите оценку");
 
-                        InsertGrade(connection, NS[0], NS[1], Date, score);
+                        InsertGrade(connection, name, surname, Date, score);
                         break;
                     case 6:
-                        Console.WriteLine("Введите имя и фамилию студента через пробел");
-                        NS = Console.ReadLine().Split();
+                        name = GetValue<string>("Введите имя студента");
 
-                        Console.WriteLine("Введите новый факультет");
-                        department = Console.ReadLine();
+                        surname = GetValue<string>("Введите фамилию студента");
 
-                        UpdateStudent(connection, NS[0], NS[1], department);
+                        department = GetValue<string>("Введите новый факультет");
+
+                        UpdateStudent(connection, name, surname, department);
                         break;
                     case 7:
-                        Console.WriteLine("Введите имя и фамилию преподавателя через пробел");
-                        NS = Console.ReadLine().Split();
+                        name = GetValue<string>("Введите имя преподавателя");
 
-                        Console.WriteLine("Введите новый факультет");
-                        department = Console.ReadLine();
-                        UpdateTeacher(connection, NS[0], NS[1], department);
+                        surname = GetValue<string>("Введите фамилию преподавателя");
+
+                        department = GetValue<string>("Введите новый факультет");
+
+                        UpdateTeacher(connection, name, surname, department);
                         break;
                     case 8:
-                        Console.WriteLine("Введите название курса");
-                        course = Console.ReadLine();
+                        course = GetValue<string>("Введите название курса");
 
-                        Console.WriteLine("Введите новое описание");
-                        string newDescription = Console.ReadLine();
+                        description = GetValue<string>("Введите новое описание");
 
-                        UpdateCourse(connection, course, newDescription);
+                        UpdateCourse(connection, course, description);
                         break;
                     case 9:
-                        Console.WriteLine("Введите имя и фамилию студента через пробел");
-                        NS = Console.ReadLine().Split();
+                        name = GetValue<string>("Введите имя студента");
 
-                        DeleteStudent(connection, NS[0], NS[1]);
+                        surname = GetValue<string>("Введите фамилию студента");
+
+                        DeleteStudent(connection, name, surname);
                         break;
                     case 10:
-                        Console.WriteLine("Введите имя и фамилию преподавателя через пробел");
-                        NS = Console.ReadLine().Split();
+                        name = GetValue<string>("Введите имя преподавателя");
 
-                        DeleteTeacher(connection, NS[0], NS[1]);
+                        surname = GetValue<string>("Введите фамилию преподавателя");
+
+                        DeleteTeacher(connection, name, surname);
                         break;
-                    case 11: 
-                        Console.WriteLine("Введите название курса");
-                        course = Console.ReadLine();
+                    case 11:
+                        course = GetValue<string>("Введите название курса");
 
                         DeleteCourse(connection, course);
                         break;
@@ -149,61 +163,58 @@ class Program
                         DeleteExam(connection, Date);
                         break;
                     case 13:
-                        Console.WriteLine("Введите факультет");
-                        department = Console.ReadLine();
+                        department = GetValue<string>("Введите факультет");
 
                         GetStudentsDepartment(connection, department);
                         break;
                     case 14:
-                        Console.WriteLine("Введите имя и фамилию преподавателя через пробел");
-                        NS = Console.ReadLine().Split();
+                        name = GetValue<string>("Введите имя преподавателя");
 
-                        GetCoursesTeacher(connection, NS[0], NS[1]);
+                        surname = GetValue<string>("Введите фамилию преподавателя");
+
+                        GetCoursesTeacher(connection, name, surname);
                         break;
                     case 15:
-                        Console.WriteLine("Введите название курса");
-                        course = Console.ReadLine();
+                        course = GetValue<string>("Введите название курса");
 
                         GetStudentsCourse(connection, course);
                         break;
                     case 16:
-                        Console.WriteLine("Введите название курса");
-                        course = Console.ReadLine();
+                        course = GetValue<string>("Введите название курса");
 
                         GetStudentsGrades(connection, course);
                         break;
                     case 17:
-                        Console.WriteLine("Введите имя и фамилию студента через пробел");
-                        NS = Console.ReadLine().Split();
+                        name = GetValue<string>("Введите имя студента");
 
-                        Console.WriteLine("Введите факультет");
-                        department = Console.ReadLine();
+                        surname = GetValue<string>("Введите фамилию студента");
 
-                        GetAverageStudentCourse(connection, NS[0], NS[1], department);
+                        department = GetValue<string>("Введите факультет");
+
+                        GetAverageStudentCourse(connection, name, surname, department);
                         break;
                     case 18:
-                        Console.WriteLine("Введите имя и фамилию студента через пробел");
-                        NS = Console.ReadLine().Split();
+                        name = GetValue<string>("Введите имя студента");
 
-                        GetAverageStudent(connection, NS[0], NS[1]);
+                        surname = GetValue<string>("Введите фамилию студента");
+
+                        GetAverageStudent(connection, name, surname);
                         break;
                     case 19:
-                        Console.WriteLine("Введите факультет");
-                        department = Console.ReadLine();
+                        department = GetValue<string>("Введите факультет");
 
                         GetAverageDepartment(connection, department);
                         break;
                     default:
                         if (n != 20)
                         {
-                            Console.WriteLine("Несуществующее дествие. попробуйте ещё раз");
+                            Console.WriteLine("Несуществующее действие. попробуйте ещё раз");
                         }
                         break;
                 }
             }
 
             connection.Close();
-            Console.WriteLine("Соединение с базой данных закрыто.");
         }
     }
 
@@ -223,7 +234,7 @@ class Program
 
             command.CommandText = @"
             CREATE TABLE IF NOT EXISTS Teachers (
-                id INT PRIMARY KEY AUTOINCREMENT,
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
                 surname TEXT NOT NULL,
                 department TEXT NOT NULL
@@ -267,7 +278,7 @@ class Program
     {
         using (var command = new SQLiteCommand(connection))
         {
-            command.CommandText = "INSERT INTO Students (name, surname, department, date) VALUES (@name, @surname, @department, @date)";
+            command.CommandText = "INSERT INTO Students ( name, surname, department, date) VALUES (@name, @surname, @department, @date)";
             command.Parameters.AddWithValue("@name", name);
             command.Parameters.AddWithValue("@surname", surname);
             command.Parameters.AddWithValue("@department", department);
@@ -281,7 +292,7 @@ class Program
     {
         using (var command = new SQLiteCommand(connection))
         {
-            command.CommandText = "INSERT INTO Teachers (name, surname, department) VALUES (@name, @surname, @department)";
+            command.CommandText = "INSERT INTO Teachers ( name, surname, department) VALUES (@name, @surname, @department)";
             command.Parameters.AddWithValue("@name", name);
             command.Parameters.AddWithValue("@surname", surname);
             command.Parameters.AddWithValue("@department", department);
@@ -319,15 +330,23 @@ class Program
 
     static void InsertGrade(SQLiteConnection connection, string name, string surname, DateOnly date, int score)
     {
-        using (var command = new SQLiteCommand(connection))
+        int max_score = GetMaxScoreByDate(connection, date);
+        if (score <= max_score)
         {
-            command.CommandText = "INSERT INTO Grades (score, student_id, exam_id) VALUES (@score, (SELECT id FROM Students WHERE name = @name AND surname = @surname), ((SELECT id FROM Exams WHERE date = @date)))";
-            command.Parameters.AddWithValue("@score", score);
-            command.Parameters.AddWithValue("@date", date);
-            command.Parameters.AddWithValue("@name", name);
-            command.Parameters.AddWithValue("@surname", surname);
-            command.ExecuteNonQuery();
-            Console.WriteLine($"Оценка добавлена.");
+            using (var command = new SQLiteCommand(connection))
+            {
+                command.CommandText = "INSERT INTO Grades (score, student_id, exam_id) VALUES (@score, (SELECT id FROM Students WHERE name = @name AND surname = @surname), ((SELECT id FROM Exams WHERE date = @date)))";
+                command.Parameters.AddWithValue("@score", score);
+                command.Parameters.AddWithValue("@date", date);
+                command.Parameters.AddWithValue("@name", name);
+                command.Parameters.AddWithValue("@surname", surname);
+                command.ExecuteNonQuery();
+                Console.WriteLine("Оценка добавлена.");
+            }
+        }
+        else
+        {
+            Console.WriteLine("Невозможно добавить оценку, больше максимального балла или экзамена не существует.");
         }
     }
 
@@ -586,5 +605,22 @@ class Program
                 Console.WriteLine($"Некорректный формат даты. Пожалуйста, введите дату в формате YYYY-MM-DD.");
             }
         }
+    }
+
+    static int GetMaxScoreByDate(SQLiteConnection connection, DateOnly date)
+    {
+        using (var command = new SQLiteCommand(connection))
+        {
+            command.CommandText = "SELECT max_score FROM Exams WHERE date = @date";
+            command.Parameters.AddWithValue("@date", date);
+            using (var reader = command.ExecuteReader())
+            {
+                if (reader.Read())
+                {
+                    return reader.GetInt32(0);
+                }
+            }
+        }
+        return -1;
     }
 }
