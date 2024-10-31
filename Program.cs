@@ -1,12 +1,14 @@
 ﻿using System;
+using System.Data.Common;
 using System.Data.SQLite;
+using System.Xml.Linq;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string connectionString = "Data Source=example.db;Version=3;";
+        string connectionString = "Data Source=example0.db;Version=3;";
         using (var connection = new SQLiteConnection(connectionString))
         {
             connection.Open();
@@ -30,8 +32,11 @@ class Program
 16. Получить оценки студентов по определенному курсу.
 17. Узнать средний балл студента по определенному курсу.
 18. Узнать средний балл студента в целом.
-19. Узнать средний балл по факультету
-20. Выйти.");
+19. Узнать средний балл по факультету.
+20. Получить список всех студентов.
+21. Получить список всех преподавателей.
+22. Получить список всех курсов.
+23. Выйти.");
 
 
             int n = 0;
@@ -51,16 +56,22 @@ class Program
             InsertExam(connection, "Теории вымирания динозавров", DateOnly.Parse("2024-10-31"), 100);
 
             InsertGrade(connection, "Петр", "Петрович", DateOnly.Parse("2024-10-31"), 20);
-            InsertGrade(connection, "Петр", "Фомин", DateOnly.Parse("2024-10-31"), 20);
+            InsertGrade(connection, "Петр", "Фомин", DateOnly.Parse("2024-10-31"), 30);
 
 
-            while (n != 20)
+            while (n != 23)
             {
                 Console.WriteLine("Выберите действие");
                 n = Input();
 
                 switch (n)
                 {
+                    case 20:
+                        GetStudents(connection); break;
+                    case 21:
+                        GetTeachers(connection); break;
+                    case 22:
+                        GetCourses(connection); break;
                     case 1:
                         string name = GetValue<string>("Введите имя студента");
 
@@ -189,9 +200,9 @@ class Program
 
                         surname = GetValue<string>("Введите фамилию студента");
 
-                        department = GetValue<string>("Введите факультет");
+                        course = GetValue<string>("Введите курс");
 
-                        GetAverageStudentCourse(connection, name, surname, department);
+                        GetAverageStudentCourse(connection, name, surname, course);
                         break;
                     case 18:
                         name = GetValue<string>("Введите имя студента");
@@ -206,7 +217,7 @@ class Program
                         GetAverageDepartment(connection, department);
                         break;
                     default:
-                        if (n != 20)
+                        if (n != 23)
                         {
                             Console.WriteLine("Несуществующее действие. попробуйте ещё раз");
                         }
@@ -384,7 +395,7 @@ class Program
             command.Parameters.AddWithValue("@description", newDescription);
             command.Parameters.AddWithValue("@title", title);
             command.ExecuteNonQuery();
-            Console.WriteLine($"Кафедра преподавателя '{title}' успешно обновлено.");
+            Console.WriteLine($"Описание курса '{title}' успешно обновлено.");
         }
     }
 
@@ -443,7 +454,7 @@ class Program
             {
                 while (reader.Read())
                 {
-                    Console.WriteLine($"ID: {reader["id"]}, Имя: {reader["name"]} {reader["surname"]}, Дата рождения: {reader["date"]}");
+                    Console.WriteLine($"ID: {reader["id"]}, Имя и фамилия: {reader["name"]} {reader["surname"]}");
                 }
             }
         }
@@ -467,14 +478,65 @@ class Program
 
     static void GetStudentsCourse(SQLiteConnection connection, string course)
     {
-        using (var command = new SQLiteCommand("SELECT s.name, s.surname FROM Students s JOIN Teachers t ON t.department = s.department JOIN Courses c ON t.id = c.teacher_id WHERE c.title = @course", connection))
+        using (var command = new SQLiteCommand(connection))
         {
-            command.Parameters.AddWithValue("@title", course);
+            // Запрос для получения списка учеников на курсе
+            command.CommandText = @"
+      SELECT s.id, s.name, s.surname 
+      FROM Students s
+      JOIN Grades g ON s.id = g.student_id
+      JOIN Exams e ON g.exam_id = e.id
+      JOIN Courses c ON e.course_id = c.id
+      WHERE c.title = @course";
+            command.Parameters.AddWithValue("@course", course);
+
             using (var reader = command.ExecuteReader())
             {
                 while (reader.Read())
                 {
-                    Console.WriteLine($"ID: {reader["id"]}, Имя: {reader["name"]} {reader["surname"]}, Дата рождения: {reader["date"]}");
+                    Console.WriteLine($"ID: {reader["id"]}, Имя: {reader["name"]} {reader["surname"]}");
+                }
+            }
+        }
+    }
+
+    static void GetStudents(SQLiteConnection connection)
+    {
+        using (var command = new SQLiteCommand("SELECT * FROM Students", connection))
+        {
+            using (var reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    Console.WriteLine($"ID: {reader["id"]}, Имя и фамилия: {reader["name"]} {reader["surname"]}");
+                }
+            }
+        }
+    }
+
+    static void GetTeachers(SQLiteConnection connection)
+    {
+        using (var command = new SQLiteCommand("SELECT * FROM Teachers", connection))
+        {
+            using (var reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    Console.WriteLine($"ID: {reader["id"]}, Имя и фамилия: {reader["name"]} {reader["surname"]}");
+                }
+            }
+        }
+    }
+
+    static void GetCourses(SQLiteConnection connection)
+    {
+        using (var command = new SQLiteCommand("SELECT * FROM Courses", connection))
+        {
+            using (var reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    Console.WriteLine($"ID: {reader["id"]}, Название: {reader["title"]}");
                 }
             }
         }
@@ -482,9 +544,17 @@ class Program
 
     static void GetStudentsGrades(SQLiteConnection connection, string course)
     {
-        using (var command = new SQLiteCommand("SELECT s.name, s.surname, g.grade FROM Students s JOIN Teachers t ON t.department = s.department JOIN Courses c ON t.id = c.teacher_id JOIN Grades g ON s.id = g.student_id WHERE c.title = @course", connection))
+        using (var command = new SQLiteCommand(connection))
         {
-            command.Parameters.AddWithValue("@title", course);
+            command.CommandText = @"
+      SELECT s.name, s.surname, g.score
+      FROM Students s
+      JOIN Grades g ON s.id = g.student_id
+      JOIN Exams e ON g.exam_id = e.id
+      JOIN Courses c ON e.course_id = c.id
+      WHERE c.title = @course";
+            command.Parameters.AddWithValue("@course", course);
+
             using (var reader = command.ExecuteReader())
             {
                 while (reader.Read())
@@ -497,7 +567,7 @@ class Program
 
     static void GetAverageStudentCourse(SQLiteConnection connection, string name, string surname, string course)
     {
-        using (var command = new SQLiteCommand("SELECT AVG(g.score) AS average_grade FROM Grades AS g JOIN Exams AS e ON g.exam_id = e.id JOIN Courses AS c ON e.course_id = c.id JOIN Students AS s ON g.student_id = s.id WHERE c.title = @course AND s.name = @name AND s.surname = surname", connection))
+        using (var command = new SQLiteCommand("SELECT AVG(g.score) AS average_grade FROM Grades AS g JOIN Exams AS e ON g.exam_id = e.id JOIN Courses AS c ON e.course_id = c.id JOIN Students AS s ON g.student_id = s.id WHERE c.title = @title AND s.name = @name AND s.surname = surname", connection))
         {
             command.Parameters.AddWithValue("@title", course);
             command.Parameters.AddWithValue("@name", name);
